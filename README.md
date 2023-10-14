@@ -1,1 +1,1 @@
-# CHATGPTBot
+# Interactive Search Bot
