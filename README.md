@@ -37,9 +37,17 @@ oCreates a Chroma vector database from the documents.
 oPersists the vectorized documents.
 
 Command to run the file
+
+
 $pip install chainlit langchain chromadb openai pypdfloader
+
+
 $ chainlit run response.py -w
+
+
 Issue:
 OpenAI API key might not be set up correctly. Need to double-check the OpenAI API key in the code. Ensure it is valid and has the necessary permissions.
+
+
 Feedback:
 We need to consider using a configuration file or environment variables for sensitive information like API keys, allowing for easier management.
