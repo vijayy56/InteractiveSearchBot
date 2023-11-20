@@ -1,4 +1,6 @@
-READ ME FILE------------------
+READ ME 
+
+
 Required Environment:
 o Python 3.10
 
@@ -18,6 +20,7 @@ oThe @cl.on_message decorator indicates that the main function is triggered when
 oThe main function is an asynchronous function that processes incoming messages.
 oIt calls the llm function to generate a response based on the content of the incoming message.
 oThe response is then sent back using cl.Message(content=response).send().
+
 
 •LLM Function (llm):
 oConfigures the OpenAI API key in the environment.
