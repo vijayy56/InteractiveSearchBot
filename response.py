@@ -10,6 +10,9 @@ from langchain.document_loaders import TextLoader
 from langchain.document_loaders import DirectoryLoader
 from langchain.document_loaders import UnstructuredPowerPointLoader
 from langchain.document_loaders import UnstructuredPDFLoader,PyPDFLoader
+import time
+
+from langchain.embeddings import HuggingFaceEmbeddings
 
 @cl.on_message
 async def main(message: cl.Message):
@@ -19,7 +22,7 @@ async def main(message: cl.Message):
 
 
 def llm(query):
-    os.environ["OPENAI_API_KEY"] = "API_KEY"    
+    os.environ["OPENAI_API_KEY"] = "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"    
     persist_directory = 'db'
     embedding = OpenAIEmbeddings()
     # loadResourceDocuments();
@@ -27,28 +30,36 @@ def llm(query):
                     embedding_function=embedding)
 
     retriever = vectordb.as_retriever(search_kwargs={"k": 2})
-
-    qa_chain = RetrievalQA.from_chain_type(llm=ChatOpenAI(model_name="gpt-3.5-turbo-0613"), 
+    qa_chain = RetrievalQA.from_chain_type(llm=ChatOpenAI(model_name="gpt-3.5-turbo-1106"), 
                                     chain_type="stuff", 
                                     retriever=retriever, 
                                     return_source_documents=True)
     
     llm_response = qa_chain(query)
-    s= llm_response['result']+"\n\nSource of the information is:"+llm_response["source_documents"][0].metadata['source'];
-    print(s)
+    s= llm_response['result']+"\n\nSource of the information is:" +llm_response["source_documents"][0].metadata['source'];
+    print(llm_response["source_documents"][0])
     return s
 
 
 def loadResourceDocuments():
     documents=[]
-    # loader2 = DirectoryLoader("/Users/vijay/Desktop/Semester 1/Network Security/Lectures",loader_cls=UnstructuredPowerPointLoader)
+    loader = DirectoryLoader("/Users/vijay/Desktop/Semester 1/Network Security/Lectures",loader_cls=UnstructuredPowerPointLoader)
     # loader = DirectoryLoader("/Users/vijay/Desktop/Semester 1/Network Security/TB", glob='**/*.pdf',loader_cls=UnstructuredPDFLoader);
     loader2 = PyPDFLoader("/Users/vijay/Desktop/Semester 1/Network Security/TB/Stallingstest.pdf")
-    documents.extend(loader2.load())
-    text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=100,separator="\n")
+    loader3 = PyPDFLoader("/Users/vijay/Desktop/Semester 1/Network Security/TB/StallingsTextBook.pdf")
+    time.sleep(60)
+
+    documents.extend(loader3.load_and_split())
+    time.sleep(50)
+    documents.extend(loader2.load_and_split())
+    time.sleep(60)
+    documents.extend(loader.load_and_split())
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=10,separator="\n")
     texts = text_splitter.split_documents(documents)
     vectordb = None
     embedding = OpenAIEmbeddings()
+    # embedding = HuggingFaceEmbeddings(model_name = "sentence-transformers/all-MiniLM-")
+
     persist_directory = 'db'
 
     vectordb = Chroma.from_documents(documents=texts, 
