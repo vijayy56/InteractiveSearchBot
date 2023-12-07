@@ -11,6 +11,7 @@ from langchain.document_loaders import DirectoryLoader
 from langchain.document_loaders import UnstructuredPowerPointLoader
 from langchain.document_loaders import UnstructuredPDFLoader,PyPDFLoader
 import time
+import json
 
 from langchain.embeddings import HuggingFaceEmbeddings
 
@@ -22,7 +23,8 @@ async def main(message: cl.Message):
 
 
 def llm(query):
-    os.environ["OPENAI_API_KEY"] = "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"    
+    os.environ["OPENAI_API_KEY"] = "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"
+    # "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"    
     persist_directory = 'db'
     embedding = OpenAIEmbeddings()
     # loadResourceDocuments();
@@ -30,21 +32,20 @@ def llm(query):
                     embedding_function=embedding)
 
     retriever = vectordb.as_retriever(search_kwargs={"k": 2})
-    qa_chain = RetrievalQA.from_chain_type(llm=ChatOpenAI(model_name="gpt-3.5-turbo-1106"), 
+    qa_chain = RetrievalQA.from_chain_type(llm=ChatOpenAI(model_name="gpt-3.5-turbo-1106",verbose=True), 
                                     chain_type="stuff", 
                                     retriever=retriever, 
                                     return_source_documents=True)
     
     llm_response = qa_chain(query)
-    s= llm_response['result']+"\n\nSource of the information is:" +llm_response["source_documents"][0].metadata['source'];
-    print(llm_response["source_documents"][0])
+    s= llm_response['result'] +"\n\nSource of the information is: " +json.dumps(llm_response["source_documents"][0].metadata);
+    print(llm_response)
     return s
 
 
 def loadResourceDocuments():
     documents=[]
     loader = DirectoryLoader("/Users/vijay/Desktop/Semester 1/Network Security/Lectures",loader_cls=UnstructuredPowerPointLoader)
-    # loader = DirectoryLoader("/Users/vijay/Desktop/Semester 1/Network Security/TB", glob='**/*.pdf',loader_cls=UnstructuredPDFLoader);
     loader2 = PyPDFLoader("/Users/vijay/Desktop/Semester 1/Network Security/TB/Stallingstest.pdf")
     loader3 = PyPDFLoader("/Users/vijay/Desktop/Semester 1/Network Security/TB/StallingsTextBook.pdf")
     time.sleep(60)
@@ -56,9 +57,9 @@ def loadResourceDocuments():
     documents.extend(loader.load_and_split())
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=10,separator="\n")
     texts = text_splitter.split_documents(documents)
+
     vectordb = None
     embedding = OpenAIEmbeddings()
-    # embedding = HuggingFaceEmbeddings(model_name = "sentence-transformers/all-MiniLM-")
 
     persist_directory = 'db'
 
@@ -67,9 +68,3 @@ def loadResourceDocuments():
                                     persist_directory=persist_directory)
 
     vectordb.persist()
-
-# def create_agent_chain():
-#     model_name = "gpt-3.5-turbo"
-#     llm = ChatOpenAI(model_name=model_name)
-#     chain = load_qa_chain(llm, chain_type="stuff")
-#     return chain
