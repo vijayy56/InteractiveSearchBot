@@ -10,6 +10,11 @@
 - `os`: The Python standard library module for interacting with the operating system.
 - `Chroma`: A library for vectorizing and retrieving documents.
 
+## SYSTEM ARCHITECTURE
+
+![SYSTEM ARCHITECTURE](systemarchitecture.png)
+
+
 ## Flow of Execution
 
 ### Message Handling
